@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .App-logo {
@@ -36,3 +37,67 @@
     transform: rotate(360deg);
   }
 }
+
+
+.forma{
+  width: 75vw;
+  margin-top: -4vh;
+  padding-top: 4vh;
+  padding-bottom: 2vh;
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+  flex-direction: column;
+  top: 20%;
+  z-index: 3; 
+  border-radius: 30px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.inputStyle {
+  margin-top: 23px;
+  border-radius: 10px;
+  width: 56vw;
+  height: 5.5vh;
+  border: none;
+  outline: none;
+  border-radius: 10px;
+  font-size: 18px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.inputStyle::placeholder{
+  color: #8B8989
+}
+
+#submitButton{
+  margin-top: 4.7vh;
+  padding: 0 18px;
+  height: 5vh;
+  background-color: #7F61BA;
+  color: white;
+  border: none;
+  outline: none;
+  border-radius: 15px;
+  font-size: 18.5px;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.listElement {
+  font-size: 18px;
+  font-weight: bold;
+  text-shadow: 0px 1px 1px #00000040;
+  box-sizing: border-box;
+  border: none;
+  color: #7F61BA;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  box-shadow: 0px 4px 4px 0px #00000040;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+

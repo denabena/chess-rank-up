@@ -8,36 +8,33 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.util.Objects;
-
 @Entity
-@Table(name = "MyRank")
+@Table(name = "myrank")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Rank {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idRank")
+    @Column(name = "idrank")
     private Long id;
 
     @NotBlank
     @Size(max = 30)
-    @Column(name = "nameRank", nullable = false)
+    @Column(name = "namerank", nullable = false)
     private String name;
 
-    @Size(max = 80)
     @Column(name = "image")
     private String image;
 
-    @Column(name = "pointsModifier", nullable = false)
+    @Column(name = "pointsmodifier", nullable = false)
     @ColumnDefault(value = "0")
     private Integer pointsModifier = 0;
 
-    @Column(name = "pointsRequired")
+    @Column(name = "pointsrequired")
     private Integer pointsRequired;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "idSection", nullable = false)
+    @JoinColumn(name = "idsection", nullable = false)
     private Section section;
 }

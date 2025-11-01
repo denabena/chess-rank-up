@@ -18,9 +18,10 @@ import java.io.IOException;
 @Service
 public class EmailSenderService {
 
+    /*
     // TODO: Set correct information about SMTP account into application.yml
     // Use .env files for security
-    //@Autowired
+    @Autowired
     private JavaMailSender javaMailSender;
 
     public void sendEmail(String to, String subject, String body, String logoPath, String attachmentPath) throws MessagingException, IOException {
@@ -55,4 +56,5 @@ public class EmailSenderService {
 
         javaMailSender.send(message);
     }
+     */
 }

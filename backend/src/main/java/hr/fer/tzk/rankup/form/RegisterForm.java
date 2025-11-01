@@ -21,6 +21,10 @@ public class RegisterForm {
     @Size(max = 30, message = "Last name too long")
     private String lastName;
 
+    @NotBlank(message = "JMBAG is missing")
+    @ValidJmbag
+    private String jmbag;
+
     @NotBlank(message = "Email is missing")
     @Size(max = 50, message = "Email too long")
     @ValidEmail
@@ -35,8 +39,4 @@ public class RegisterForm {
     @Size(min = 8, max = 30, message = "Repeat password too short or too long")
     @ValidPassword
     private String repeatPassword;
-
-    @NotBlank(message = "JMBAG is missing")
-    @ValidJmbag
-    private String jmbag;
 }

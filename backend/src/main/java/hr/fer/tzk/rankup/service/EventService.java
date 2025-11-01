@@ -1,64 +1,67 @@
 package hr.fer.tzk.rankup.service;
 
-import hr.fer.tzk.rankup.dto.EventDTO;
+import hr.fer.tzk.rankup.dto.EventDto;
+import hr.fer.tzk.rankup.form.EventForm;
+import hr.fer.tzk.rankup.mapper.EventMapper;
 import hr.fer.tzk.rankup.model.Event;
 import hr.fer.tzk.rankup.model.EventType;
 import hr.fer.tzk.rankup.model.Section;
 import hr.fer.tzk.rankup.repository.EventRepository;
 import hr.fer.tzk.rankup.repository.EventTypeRepository;
 import hr.fer.tzk.rankup.repository.SectionRepository;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class EventService {
-    private EventRepository eventRepository;
-    private SectionRepository sectionRepository;
-    private EventTypeRepository eventTypeRepository;
+    private final EventRepository eventRepository;
+    private final SectionRepository sectionRepository;
+    private final EventTypeRepository eventTypeRepository;
+    private final SectionService sectionService;
+    private final EventTypeService eventTypeService;
+    private final ParticipationService participationService;
 
-    public EventService(EventRepository eventRepository, SectionRepository sectionRepository, EventTypeRepository eventTypeRepository) {
+    @Autowired
+    public EventService(EventRepository eventRepository, SectionRepository sectionRepository, EventTypeRepository eventTypeRepository, SectionService sectionService, EventTypeService eventTypeService, ParticipationService participationService) {
         this.eventRepository = eventRepository;
         this.sectionRepository = sectionRepository;
         this.eventTypeRepository = eventTypeRepository;
+        this.sectionService = sectionService;
+        this.eventTypeService = eventTypeService;
+        this.participationService = participationService;
     }
 
-    public ResponseEntity<List<Event>> findAll() {
-        return ResponseEntity.ok(eventRepository.findAll());
+    public List<EventDto> findAllBySectionId(Long idSection) {
+        List<Event> events = eventRepository.findAllBySection_IdOrderByDateDesc(idSection);
+        return events.stream()
+                .map(EventMapper::toDto).
+                toList();
     }
 
     public Optional<Event> findByName(String name) {
         return eventRepository.findByName(name);
     }
 
-    public ResponseEntity findEventById(Long id) {
-        Optional<Event> event = eventRepository.findById(id);
-        if (event.isPresent()) {
-            return ResponseEntity.ok(event.get());
-        }
-        return ResponseEntity.notFound().build();
+    public Optional<Event> findEventByIdAndSectionId(Long idEvent, Long idSection) {
+        return eventRepository.findByIdAndSection_Id(idEvent, idSection);
     }
 
-    public ResponseEntity createEvent(EventDTO eventDTO) {
-        Optional<Section> section = sectionRepository.findById(eventDTO.getIdSection());
-        Optional<EventType> eventType = eventTypeRepository.findById(eventDTO.getIdEventType());
+    /*
+    public ResponseEntity<String> createEvent(Long idSection, EventForm eventForm) {
+        Optional<Section> section = sectionService.findSectionById(idSection);
+        Optional<EventType> eventType = eventTypeRepository.findById(eventForm.getIdEventType());
 
-        if (section.isEmpty() || eventType.isEmpty()) {
-            return ResponseEntity.badRequest().body("Nepostojeća sekcija ili tip eventa");
+        String checkEmptyData = checkSectionAndEventType(section, eventType);
+        if (checkEmptyData.length() > 1) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(checkEmptyData);
         }
 
-        if (eventDTO.getName() == null || eventDTO.getName().isBlank() ||
-                eventDTO.getDate() == null ||
-                eventDTO.getDescription() == null || eventDTO.getDescription().isBlank()
-        ) {
-            return ResponseEntity.badRequest().body("Svi atributi moraju biti popunjeni");
-        }
-
-        Event newEvent = new Event(eventDTO.getName(), eventDTO.getDate(), eventDTO.getDescription(), section.get(), eventType.get());
+        Event newEvent = EventMapper.fromForm(eventForm, section.get(), eventType.get());
         newEvent = eventRepository.save(newEvent);
 
         URI location = ServletUriComponentsBuilder
@@ -67,45 +70,54 @@ public class EventService {
                 .buildAndExpand(newEvent.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).build();
-    }
+        return ResponseEntity.status(HttpStatus.CREATED).location(location).build();
+    }*/
 
-    public ResponseEntity updateEvent(Long id, EventDTO eventDTO) {
-        if (eventDTO.getName() == null || eventDTO.getName().isBlank() ||
-                eventDTO.getDate() == null ||
-                eventDTO.getDescription() == null || eventDTO.getDescription().isBlank()
-        ) {
-            return ResponseEntity.badRequest().body("Svi atributi moraju biti popunjeni");
+    public Event createEvent(Long idSection, EventForm eventForm) {
+        Long idEventType = eventForm.getIdEventType();
+        Optional<EventType> eventTypeOpt = eventTypeService.findEventTypeById(idEventType);
+        Optional<Section> sectionOpt = sectionService.findSectionById(idSection);
+        if (sectionOpt.isEmpty() || eventTypeOpt.isEmpty()) {
+            return null;
         }
 
-        if (eventRepository.existsById(id)) {
-            if (!sectionRepository.existsById(eventDTO.getIdSection()) ||
-                    !eventTypeRepository.existsById(eventDTO.getIdEventType())
-            ) {
-                return ResponseEntity.badRequest().body("Nepostojeća sekcija ili tip eventa");
-            }
+        Section section = sectionOpt.get();
+        EventType eventType = eventTypeOpt.get();
 
-            Event newEvent = eventRepository.findById(id).get();
-            newEvent.setName(eventDTO.getName());
-            newEvent.setDescription(eventDTO.getDescription());
-            newEvent.setDate(eventDTO.getDate());
-            newEvent.setSection(sectionRepository.findById(eventDTO.getIdSection()).get());
-            newEvent.setEventType(eventTypeRepository.findById(eventDTO.getIdEventType()).get());
-            eventRepository.save(newEvent);
-
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        Event newEvent = EventMapper.fromForm(eventForm, section, eventType);
+        return eventRepository.save(newEvent);
     }
 
-    public ResponseEntity deleteEvent(Long id) {
-        Optional<Event> event = eventRepository.findById(id);
+    public Optional<Event> updateEvent(Long idSection, Long idEvent, EventForm eventForm) {
+        Optional<Event> existingEvent = eventRepository.findByIdAndSection_Id(idEvent, idSection);
+        Optional<Section> sectionOpt = sectionRepository.findById(idSection);
+        Optional<EventType> eventTypeOpt = eventTypeRepository.findById(eventForm.getIdEventType());
+
+        if (existingEvent.isEmpty() || sectionOpt.isEmpty() || eventTypeOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Section section = sectionOpt.get();
+        EventType eventType = eventTypeOpt.get();
+        Event newEvent = eventRepository.save(EventMapper.fromForm(eventForm, section, eventType));
+        return Optional.of(newEvent);
+    }
+
+    public boolean deleteEvent(Long idSection, Long idEvent) {
+        Optional<Event> event = eventRepository.findByIdAndSection_Id(idEvent, idSection);
         if (event.isPresent()) {
-            eventRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
+            eventRepository.deleteById(idEvent);
+            participationService.deleteAllParticipationsByEventId(idSection, idEvent);
+            return true;
         }
+        return false;
+    }
 
-        return ResponseEntity.notFound().build();
+    public List<EventDto> getAllEventsBetweenDates(Long idSection, LocalDate dateFrom, LocalDate dateTo) {
+        List<Event> events = eventRepository.findAllByDateBetweenAndSection_IdOrderByDate(dateFrom, dateTo, idSection);
+        return events.stream()
+                .map(EventMapper::toDto)
+                .sorted(Comparator.comparing(EventDto::getDate))
+                .toList();
     }
 }

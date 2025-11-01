@@ -1,104 +1,45 @@
 package hr.fer.tzk.rankup.model;
 
-import java.time.LocalDate;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Entity
-@Table(name = "MyEvent")
+@Table(name = "myevent")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idEvent")
+    @Column(name = "idevent")
     private Long id;
 
     @NotBlank
     @Size(max = 30)
-    @Column(name = "nameEvent", nullable = false)
+    @Column(name = "nameevent", nullable = false)
     private String name;
 
     @NotNull
     @Temporal(TemporalType.DATE)
-    @Column(name = "dateEvent", nullable = false)
+    @Column(name = "dateevent", nullable = false)
     private LocalDate date;
     
     @Size(max = 80)
-    @Column(name = "descriptionEvent")
+    @Column(name = "descriptionevent")
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "idSection", nullable = false)
+    @JoinColumn(name = "idsection", nullable = false)
     private Section section;
 
     @ManyToOne
-    @JoinColumn(name = "idEventType", nullable = false)
+    @JoinColumn(name = "ideventtype", nullable = false)
     private EventType eventType;
-
-    public Event() { }
-
-    public Event(String name, LocalDate date, Section section, EventType eventType) {
-        this.name = name;
-        this.date = date;
-        this.section = section;
-        this.eventType = eventType;
-    }
-
-    public Event(String name, LocalDate date, String description, Section section, EventType eventType) {
-        this.name = name;
-        this.date = date;
-        this.description = description;
-        this.section = section;
-        this.eventType = eventType;
-    }
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public @NotBlank @Size(max = 30) String getName() {
-        return name;
-    }
-
-    public void setName(@NotBlank @Size(max = 30) String name) {
-        this.name = name;
-    }
-
-    public @NotNull LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(@NotNull LocalDate date) {
-        this.date = date;
-    }
-
-    public @Size(max = 80) String getDescription() {
-        return description;
-    }
-
-    public void setDescription(@Size(max = 80) String description) {
-        this.description = description;
-    }
-
-    public Section getSection() {
-        return section;
-    }
-
-    public void setSection(Section section) {
-        this.section = section;
-    }
-
-    public EventType getEventType() {
-        return eventType;
-    }
-
-    public void setEventType(EventType eventType) {
-        this.eventType = eventType;
-    }
 }

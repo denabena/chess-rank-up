@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class MemberProfileService {
@@ -33,13 +32,14 @@ public class MemberProfileService {
 
     public ProfileGeneralInfoDto getGeneralProfileInfo(Long idSection, Long idMember) {
         Optional<SectionMember> sectionMemberOpt = sectionMemberService.findSectionMemberByIdSection(idMember, idSection);
-        System.out.println("1");
+        //System.out.println("1");
         if (sectionMemberOpt.isEmpty()) {
             return null;
         }
-        System.out.println("2");
+        //System.out.println("2");
 
         SectionMember sectionMember = sectionMemberOpt.get();
+        //System.out.println("Sekcija: " + sectionMember.getSection().getName());
 
         Optional<Semester> currentSemesterOpt = semesterService.findCurrentSemester();
         Optional<Semester> latestSemesterOpt = semesterService.findLatestSemester();
@@ -53,23 +53,30 @@ public class MemberProfileService {
             semester = currentSemesterOpt.get();
         }
 
-        System.out.println("3");
+        //System.out.println("3");
 
         Long idSemester = semester.getId();
         Optional<SectionSemester> sectionSemesterOpt = sectionSemesterService.findSectionSemesterByAlterKey(idMember, idSection, idSemester);
+        int pointsModifier;
+        int threshold;
+        int pointsSemester;
+
         if (sectionSemesterOpt.isEmpty()) {
             return null;
         }
-        System.out.println("4");
+        //System.out.println("4");
 
         SectionSemester sectionSemester = sectionSemesterOpt.get();
-        int pointsModifier = sectionMember.getRank().getPointsModifier();
-        int threshold = sectionSemester.getThreshold();
-        int pointsSemester = sectionSemester.getPoints();
+        pointsModifier = sectionMember.getRank().getPointsModifier();
+        threshold = sectionSemester.getThreshold();
+        pointsSemester = sectionSemester.getPoints();
         ProfileGeneralInfoDto profileGeneralInfo = new ProfileGeneralInfoDto();
+        profileGeneralInfo.setSectionId(sectionMember.getSection().getId());
         profileGeneralInfo.setFirstName(sectionMember.getMember().getFirstName());
         profileGeneralInfo.setLastName(sectionMember.getMember().getLastName());
+        profileGeneralInfo.setJmbag(sectionMember.getMember().getJmbag());
         profileGeneralInfo.setRankName(sectionMember.getRank().getName());
+        //System.out.println("sectionMember: " + sectionMember.getMember().getLastName() + ' ' + sectionMember.getPointsAll());
         profileGeneralInfo.setPointsTotal(sectionMember.getPointsAll());
         profileGeneralInfo.setPointsSemester(pointsSemester);
         profileGeneralInfo.setAdditionalPointsNeeded(Math.max(threshold - pointsModifier - pointsSemester, 0));
@@ -77,6 +84,7 @@ public class MemberProfileService {
     }
 
     public ActivityPageDto getActivityPage(Long idSection, Long idMember) {
+        //System.out.println("\n\nLet's start");
         Optional<SectionMember> sectionMemberOpt = sectionMemberService.findSectionMemberByIdSection(idMember, idSection);
         if (sectionMemberOpt.isEmpty()) {
             return null;
@@ -84,10 +92,12 @@ public class MemberProfileService {
         SectionMember sectionMember = sectionMemberOpt.get();
 
         Member member = sectionMember.getMember();
+        //System.out.println("Section id: " + idSection + ", Member id: " + idMember);
         List<Participation> participations = participationRepository.findAllByMember_Id(idMember);
+        //System.out.println("Here");
         List<ProfileEventDto> events = participations.stream()
                 .filter(participation -> participation.getEvent().getSection().getId().equals(idSection))
-                .map(ParticipationMapper::toDto)
+                .map(ParticipationMapper::toProfileDto)
                 .toList();
 
         String firstName = member.getFirstName();

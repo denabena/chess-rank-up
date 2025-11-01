@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 public class ProfileGeneralInfoDto {
     private String firstName;
     private String lastName;
+    private String jmbag;
+    private Long sectionId;
     private String rankName;
     private int pointsSemester;
     private int additionalPointsNeeded;

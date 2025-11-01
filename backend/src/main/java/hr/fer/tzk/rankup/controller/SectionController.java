@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/sections")
+@RequestMapping("/sections")
 public class SectionController {
     private final SectionService sectionService;
 
@@ -78,7 +78,7 @@ public class SectionController {
         }
     }
 
-    @PutMapping("/{idSection}")
+    @PostMapping("/{idSection}")
     public ResponseEntity<SectionDto> updateSection(@PathVariable Long idSection, @Valid @RequestBody SectionForm form) {
         Optional<Section> sectionOpt = sectionService.findSectionById(idSection);
         if (sectionOpt.isEmpty()) {
